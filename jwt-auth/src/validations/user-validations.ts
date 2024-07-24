@@ -20,6 +20,7 @@ export const registerSchema = z
         message: "Invalid date format",
       }
     ),
+
     email: z.string().email("Invalid email address"),
     password: z
       .string()

@@ -1,12 +1,12 @@
 import { NextFunction, Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
-import mongoose from "mongoose";
 import {
   BadRequestError,
   NotFoundError,
   UnAuthenticatedError,
 } from "../errors/custom-error.js";
 import { User } from "../models/user.js";
+import { AuthenticatedRequest } from "../types/types.js";
 import { comparePassword } from "../utils/password-utils.js";
 import { createJwt } from "../utils/token-utils.js";
 import {
@@ -39,7 +39,7 @@ export const register = async (
 
   const user = await User.create(validation.data);
 
-  res.status(StatusCodes.OK).json({
+  res.status(StatusCodes.CREATED).json({
     success: true,
     message: "User created successfully",
     user,
@@ -72,16 +72,40 @@ export const login = async (
     return next(new UnAuthenticatedError("Invalid Credentials"));
   }
 
-  const token = createJwt({ userId: user._id as mongoose.Types.ObjectId });
+  const token = createJwt({ userId: user._id as string });
 
   res.cookie("token", token, {
     httpOnly: true,
-    expires: new Date(Date.now() + Number(process.env.COOKIE_EXPIRES_IN!)), // expires in 1day
+    expires: new Date(Date.now() + Number(process.env.COOKIE_EXPIRES_IN)),
     secure: process.env.NODE_ENV === "production",
   });
 
   res.status(StatusCodes.OK).json({
     success: true,
     message: "User Logged In successfully",
+  });
+};
+
+export const getAllUsers = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  const userId = req.user?.userId;
+
+  if (!userId) {
+    return next(new NotFoundError("User not authenticated"));
+  }
+
+  const userExist = await User.findById(userId);
+  if (!userExist) {
+    return next(new NotFoundError("User not found"));
+  }
+
+  const users = await User.find({});
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    users,
   });
 };

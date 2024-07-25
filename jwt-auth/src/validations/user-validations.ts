@@ -1,3 +1,4 @@
+import moment from "moment";
 import { z } from "zod";
 
 export const registerSchema = z
@@ -11,13 +12,24 @@ export const registerSchema = z
       .min(3, "Last name must be at least 3 characters long")
       .max(15, "Last name should not be greater than 15 characters")
       .optional(),
+    // dob: z.string().refine(
+    //   (val) => {
+    //     const date = new Date(val);
+    //     return !isNaN(date.getTime()); // isNaN is not valid and hence !isNaN is valid
+    //   },
+    //   {
+    //     message: "Invalid date format",
+    //   }
+    // ),
     dob: z.string().refine(
       (val) => {
-        const date = new Date(val);
-        return !isNaN(date.getTime()); // isNaN is not valid and hence !isNaN is valid
+        const format = "YYYY-MM-DD";
+
+        const date = moment(val, format, true);
+        return date.isValid() && date.format(format) === val;
       },
       {
-        message: "Invalid date format",
+        message: "Invalid date format. Expected format is YYYY-MM-DD.",
       }
     ),
 

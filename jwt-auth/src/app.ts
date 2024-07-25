@@ -15,7 +15,7 @@ import { errorHandlerMiddleware } from "./middlewares/error-middleware.js";
 import userRoutes from "./routes/user.js";
 
 // environment variables
-const port = process.env.PORT;
+const port = process.env.PORT || 3000;
 const node_env = process.env.NODE_ENV || "development";
 const mongo_url = process.env.MONGODB_URI;
 

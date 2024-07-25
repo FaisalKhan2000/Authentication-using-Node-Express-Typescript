@@ -1,5 +1,6 @@
 import mongoose, { Schema, Document } from "mongoose";
 import { hashPassword } from "../utils/password-utils.js";
+import moment from "moment";
 
 const userSchema = new Schema(
   {
@@ -35,8 +36,8 @@ interface IUser extends Document {
   password: string;
 }
 
-// Hash the password before saving the user model
 userSchema.pre<IUser>("save", async function (next) {
+  // hashing password
   if (this.isModified("password")) {
     const hashedPassword = await hashPassword(this.password);
     this.password = hashedPassword;

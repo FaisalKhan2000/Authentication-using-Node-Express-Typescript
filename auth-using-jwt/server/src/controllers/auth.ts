@@ -4,17 +4,23 @@ import {
   BadRequestError,
   NotFoundError,
   UnAuthenticatedError,
+  UnAuthorizedError,
 } from "../errors/custom-error.js";
 import { User } from "../models/user.js";
 import { AuthenticatedRequest } from "../types/types.js";
-import { comparePassword } from "../utils/password-utils.js";
-import { createJwt } from "../utils/token-utils.js";
+import { comparePassword, hashPassword } from "../utils/password-utils.js";
+import { createJwt, verifyJWT } from "../utils/token-utils.js";
 import {
+  TForgetPasswordType,
   TLoginType,
   TRegisterType,
+  TResetPasswordType,
+  forgetPasswordSchema,
   loginSchema,
   registerSchema,
+  resetPasswordSchema,
 } from "../validations/user-validations.js";
+import { sendResetMail } from "../utils/node-mailer.js";
 
 export const signUp = async (
   req: Request<{}, {}, TRegisterType>,
@@ -77,12 +83,87 @@ export const login = async (
   res.cookie("token", token, {
     httpOnly: true,
     expires: new Date(Date.now() + Number(process.env.COOKIE_EXPIRES_IN)),
-    secure: process.env.NODE_ENV === "production",
+    // secure: process.env.NODE_ENV === "production",
+    secure: true,
   });
 
   res.status(StatusCodes.OK).json({
     success: true,
     message: "User Logged In successfully",
+  });
+};
+
+export const forgetPassword = async (
+  req: Request<{}, {}, TForgetPasswordType>,
+  res: Response,
+  next: NextFunction
+) => {
+  const validation = forgetPasswordSchema.safeParse(req.body);
+
+  if (!validation.success) {
+    const errorMessage = validation.error.errors
+      .map((err) => err.message)
+      .join(", ");
+    return next(new BadRequestError(errorMessage));
+  }
+
+  const { email } = validation.data;
+
+  const user = await User.findOne({ email });
+  if (!user) {
+    return next(new NotFoundError("User with this email doesn't exists"));
+  }
+
+  const token = createJwt({ userId: user._id as string });
+
+  await sendResetMail({ userEmail: email, token });
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    message: "Password reset email sent successfully",
+  });
+};
+
+interface ResetPasswordParams {
+  token: string;
+}
+export const resetPassword = async (
+  req: Request<ResetPasswordParams, {}, TResetPasswordType>,
+  res: Response,
+  next: NextFunction
+) => {
+  const validation = resetPasswordSchema.safeParse(req.body);
+
+  if (!validation.success) {
+    const errorMessage = validation.error.errors
+      .map((err) => err.message)
+      .join(", ");
+    return next(new BadRequestError(errorMessage));
+  }
+
+  const { password } = validation.data;
+
+  const token = req.params.token;
+
+  const { userId } = verifyJWT(token);
+  if (!userId) {
+    return next(new BadRequestError("no user id"));
+  }
+  const hashedPassword = await hashPassword(password);
+
+  const user = await User.findByIdAndUpdate(
+    { _id: userId },
+    { password: hashedPassword },
+    { new: true }
+  );
+  if (!user) {
+    return next(new UnAuthorizedError("User not found"));
+  }
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    message: "Password Updated Successfully",
+    // hashedPassword: hashedPassword,
   });
 };
 

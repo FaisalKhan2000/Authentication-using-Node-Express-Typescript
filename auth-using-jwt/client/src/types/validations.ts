@@ -1,7 +1,7 @@
 import moment from "moment";
 import { z } from "zod";
 
-export const registerSchema = z
+export const signUpSchema = z
   .object({
     firstName: z
       .string()
@@ -12,15 +12,7 @@ export const registerSchema = z
       .min(3, "Last name must be at least 3 characters long")
       .max(15, "Last name should not be greater than 15 characters")
       .optional(),
-    // dob: z.string().refine(
-    //   (val) => {
-    //     const date = new Date(val);
-    //     return !isNaN(date.getTime()); // isNaN is not valid and hence !isNaN is valid
-    //   },
-    //   {
-    //     message: "Invalid date format",
-    //   }
-    // ),
+
     dob: z.string().refine(
       (val) => {
         const format = "YYYY-MM-DD";
@@ -52,8 +44,6 @@ export const registerSchema = z
     }
   );
 
-export type TRegisterType = z.infer<typeof registerSchema>;
-
 export const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z
@@ -62,13 +52,9 @@ export const loginSchema = z.object({
     .max(12, "Password should not be greater than 12 characters"),
 });
 
-export type TLoginType = z.infer<typeof loginSchema>;
-
 export const forgetPasswordSchema = z.object({
   email: z.string().email("Invalid email address"),
 });
-
-export type TForgetPasswordType = z.infer<typeof forgetPasswordSchema>;
 
 export const resetPasswordSchema = z
   .object({
@@ -89,5 +75,3 @@ export const resetPasswordSchema = z
       path: ["confirmPassword"],
     }
   );
-
-export type TResetPasswordType = z.infer<typeof resetPasswordSchema>;

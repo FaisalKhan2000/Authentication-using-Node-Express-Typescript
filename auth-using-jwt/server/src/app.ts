@@ -1,10 +1,10 @@
+import cookieParser from "cookie-parser";
+import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
 import "express-async-errors";
 import mongoose from "mongoose";
 import morgan from "morgan";
-import cors from "cors";
-import cookieParser from "cookie-parser";
 dotenv.config({
   path: "./.env",
 });
@@ -45,5 +45,4 @@ const startServer = async () => {
     process.exit(1);
   }
 };
-
 startServer();

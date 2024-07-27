@@ -127,6 +127,7 @@ export const forgetPassword = async (
 interface ResetPasswordParams {
   token: string;
 }
+
 export const resetPassword = async (
   req: Request<ResetPasswordParams, {}, TResetPasswordType>,
   res: Response,
@@ -164,6 +165,22 @@ export const resetPassword = async (
     success: true,
     message: "Password Updated Successfully",
     // hashedPassword: hashedPassword,
+  });
+};
+
+export const logout = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  res.cookie("token", "logout", {
+    httpOnly: true,
+    expires: new Date(Date.now()),
+  });
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    message: "user logged out!",
   });
 };
 

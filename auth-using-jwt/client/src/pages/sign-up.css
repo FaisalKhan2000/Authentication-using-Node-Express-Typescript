@@ -18,14 +18,14 @@
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-label {
+.sign-up-form > label {
   display: block;
   margin-bottom: 0.8rem;
   text-transform: capitalize;
   font-weight: 600;
 }
 
-input {
+.sign-up-form > input {
   width: 100%;
   padding: 0.8rem;
   margin-bottom: 1rem;
@@ -38,7 +38,7 @@ input {
 
 } */
 
-button {
+.sign-up-form > button {
   width: 100%;
   padding: 1rem;
   background-color: #3498db;
@@ -50,11 +50,11 @@ button {
   font-weight: 500;
 }
 
-button:hover {
+.sign-up-form > button:hover {
   background-color: #2980b9;
 }
 
-button:disabled {
+.sign-up-form > button:disabled {
   background-color: #2980b9;
 }
 

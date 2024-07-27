@@ -1,10 +1,10 @@
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
-import Layout from "./layout/layout";
 import ForgetPassword from "./pages/forget-password";
 import Home from "./pages/home";
 import Login from "./pages/login";
-import ResetPassword from "./pages/reset-password";
 import SignUp from "./pages/sign-up";
+import ResetPassword from "./pages/reset-password";
+import Layout from "./layout/layout";
 
 const router = createBrowserRouter([
   {

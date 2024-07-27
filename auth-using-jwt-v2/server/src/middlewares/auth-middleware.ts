@@ -1,4 +1,4 @@
-import { NextFunction, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import { UnAuthenticatedError } from "../errors/custom-error.js";
 import { AuthenticatedRequest } from "../types/types.js";
 import { verifyJWT } from "../utils/token-utils.js";
@@ -15,8 +15,8 @@ export const authenticateUser = (
   }
 
   try {
-    const { userId } = verifyJWT(token);
-    req.user = { userId };
+    const { userId, type } = verifyJWT(token);
+    req.user = { userId, type };
     next();
   } catch (error) {
     return next(new UnAuthenticatedError("Invalid Credentials"));

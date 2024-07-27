@@ -1,9 +1,9 @@
 import { z } from "zod";
 import {
-  forgetPasswordSchema,
   loginSchema,
-  resetPasswordSchema,
+  forgetPasswordSchema,
   signUpSchema,
+  resetPasswordSchema,
 } from "./validations";
 
 export type TSignUpType = z.infer<typeof signUpSchema>;

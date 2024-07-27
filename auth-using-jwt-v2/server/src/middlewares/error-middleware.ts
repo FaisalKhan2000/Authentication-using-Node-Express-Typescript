@@ -14,6 +14,27 @@ export const errorHandlerMiddleware = (
     UnAuthorizedError: StatusCodes.FORBIDDEN,
   };
 
+  // reset token
+  if (error.name === "TokenExpiredError") {
+    if (req.path.includes("/reset-password/")) {
+      return res.status(StatusCodes.UNAUTHORIZED).json({
+        success: false,
+        message: "Reset password token expired",
+      });
+    } else {
+      return res.status(StatusCodes.UNAUTHORIZED).json({
+        success: false,
+        message: "Token expired",
+      });
+    }
+  } else if (error.name === "JsonWebTokenError") {
+    // Handle invalid JWT format
+    return res.status(StatusCodes.UNAUTHORIZED).json({
+      success: false,
+      message: "Invalid token format",
+    });
+  }
+
   const statusCode = errorMap[error.name] || StatusCodes.INTERNAL_SERVER_ERROR;
 
   return res.status(statusCode).json({

@@ -3,26 +3,28 @@ import axios from "axios";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import FormRow from "../components/form-row";
-import { TSignUpType } from "../types/types";
-import { signUpSchema } from "../types/validations";
+import { TLoginType } from "../types/types";
+import { loginSchema } from "../types/validations";
 import "./sign-up.css";
 
-const SignUp = () => {
+const Login = () => {
   const navigate = useNavigate();
+
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors, isLoading },
-  } = useForm<TSignUpType>({
-    resolver: zodResolver(signUpSchema),
+  } = useForm<TLoginType>({
+    resolver: zodResolver(loginSchema),
     mode: "onSubmit",
     reValidateMode: "onSubmit",
   });
 
-  const onSubmit = async (data: TSignUpType) => {
+  const onSubmit = async (data: TLoginType) => {
+    axios.defaults.withCredentials = true;
     try {
-      await axios.post("http://localhost:5100/api/v1/user/signup", data);
+      await axios.post("http://localhost:5100/api/v1/user/login", data);
       alert("Registration successful!");
       reset();
       navigate("/");
@@ -36,27 +38,7 @@ const SignUp = () => {
     <div className="sign-up-container">
       <form onSubmit={handleSubmit(onSubmit)} className="sign-up-form">
         <h2 className="heading">Sign Up</h2>
-        <FormRow
-          register={register}
-          type="text"
-          name="firstName"
-          label="first name"
-          error={errors.firstName}
-        />
-        <FormRow
-          register={register}
-          type="text"
-          name="lastName"
-          label="last name"
-          error={errors.lastName}
-        />
-        <FormRow
-          register={register}
-          type="date"
-          name="dob"
-          label="date of birth"
-          error={errors.dob}
-        />
+
         <FormRow
           register={register}
           type="text"
@@ -71,21 +53,18 @@ const SignUp = () => {
           label="password"
           error={errors.password}
         />
-        <FormRow
-          register={register}
-          type="password"
-          name="confirmPassword"
-          label="confirm password"
-          error={errors.confirmPassword}
-        />
+
         <button disabled={isLoading} type="submit">
-          {isLoading ? "submitting" : "submit"}
+          {isLoading ? "logging" : "login"}
         </button>
         <p>
-          already have an account?<Link to={"/login"}>login</Link>{" "}
+          forget password?<Link to={"/forget-password"}>forget password</Link>{" "}
+        </p>
+        <p>
+          don't have an account?<Link to={"/signup"}>signup</Link>{" "}
         </p>
       </form>
     </div>
   );
 };
-export default SignUp;
+export default Login;

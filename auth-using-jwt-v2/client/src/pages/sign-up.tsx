@@ -1,11 +1,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { useForm } from "react-hook-form";
-import { Link, useNavigate } from "react-router-dom";
 import FormRow from "../components/form-row";
 import { TSignUpType } from "../types/types";
 import { signUpSchema } from "../types/validations";
 import "./sign-up.css";
+import { Link, useNavigate } from "react-router-dom";
 
 const SignUp = () => {
   const navigate = useNavigate();

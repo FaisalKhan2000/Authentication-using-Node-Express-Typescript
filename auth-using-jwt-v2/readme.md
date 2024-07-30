@@ -8,7 +8,7 @@ This documentation provides details about the Authentication API endpoints.
 
 ## Endpoints
 
-### Signup
+### Sign Up
 
 **Endpoint**: `POST /api/v1/user/signup`
 
@@ -91,5 +91,10 @@ This documentation provides details about the Authentication API endpoints.
 
 1. **Unlimited Password Reset Requests**: Users can request password resets an unlimited number of times, which can be exploited for spamming.
 2. **No Email Verification**: Anyone can create an account without verifying their email, leading to potential issues with fake or invalid accounts.
+
+# Features to add
+
+1. create auth verification for isVerified
+2. add express rate limiter
 
 ---

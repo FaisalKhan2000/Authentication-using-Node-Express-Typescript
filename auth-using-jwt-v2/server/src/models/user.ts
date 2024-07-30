@@ -19,6 +19,10 @@ const userSchema = new Schema(
       required: true,
       unique: true,
     },
+    role: {
+      type: String,
+      default: "user",
+    },
     password: {
       type: String,
       required: true,
@@ -37,6 +41,7 @@ interface IUser extends Document {
   dob: Date;
   email: string;
   password: string;
+  role?: "user" | "admin";
   isVerified: boolean;
 }
 

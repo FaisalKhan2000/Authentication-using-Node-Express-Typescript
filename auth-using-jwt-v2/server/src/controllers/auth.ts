@@ -81,6 +81,9 @@ export const sendOtp = async (
   next: NextFunction
 ) => {
   const validation = sendOtpSchema.safeParse(req.body);
+  // setting key for rate limiter
+  req.body.email = validation.data?.email as string;
+
   if (!validation.success) {
     const errorMessage = validation.error.errors
       .map((err) => err.message)
@@ -128,6 +131,9 @@ export const emailVerification = async (
 ) => {
   const validation = verificationSchema.safeParse(req.body);
 
+  // setting key for rate limiter
+  req.body.email = validation.data?.email as string;
+
   if (!validation.success) {
     const errorMessage = validation.error.errors
       .map((err) => err.message)
@@ -143,8 +149,13 @@ export const emailVerification = async (
     return next(new BadRequestError("invalid email"));
   }
 
+  // retrieve the latest otp
+  const latestOtp = await Otp.findOne({ email }).sort({ createdAt: -1 });
+
+  // verify otp
+  const verifyOtp = latestOtp && latestOtp.otp === otp;
+
   // check for otp
-  const verifyOtp = await Otp.findOne({ email, otp });
   if (!verifyOtp) {
     return next(new BadRequestError("invalid otp"));
   }
@@ -225,6 +236,9 @@ export const forgetPassword = async (
   next: NextFunction
 ) => {
   const validation = forgetPasswordSchema.safeParse(req.body);
+
+  // setting key for rate limiter
+  req.body.email = validation.data?.email as string;
 
   if (!validation.success) {
     const errorMessage = validation.error.errors

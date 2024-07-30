@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Request } from "express";
 import {
   emailVerification,
   forgetPassword,
@@ -10,23 +10,97 @@ import {
   signUp,
 } from "../controllers/auth.js";
 import { authenticateUser } from "../middlewares/auth-middleware.js";
+import { rateLimiter } from "../middlewares/rate-limiter.js";
+
 const router = express.Router();
 
-// sign up
-router.route("/signup").post(signUp);
+// Helper function to extract email from the request
+const getEmailFromRequest = (req: Request) => {
+  return req.body?.email;
+};
 
-// otp will be valid for 5 minutes suppose you haven't verified otp
-// then request  another otp
-router.route("/email-verification").post(sendOtp);
+// Sign up with rate limit
+router.route("/signup").post(
+  rateLimiter({
+    allowedHits: 10,
+    secondsWindow: 24 * 60 * 60, // 24 hours
+    type: "ip-based",
+  }),
+  signUp
+);
 
-// verify email
-router.route("/verify").post(emailVerification);
+// Send OTP with rate limit
+router.route("/email-verification").post(
+  rateLimiter({
+    allowedHits: 3,
+    secondsWindow: 15 * 60, // 15 minutes
+    type: "key-based",
+    getKey: getEmailFromRequest,
+  }),
+  sendOtp
+);
 
-router.route("/login").post(login);
-router.route("/logout").get(logout);
-router.route("/forgetPassword").post(forgetPassword);
-router.route("/reset-password/:token").post(resetPassword);
-// testing route
-router.route("/all").get(authenticateUser, getAllUsers);
+// Verify email with rate limit
+router.route("/verify").post(
+  rateLimiter({
+    allowedHits: 4,
+    secondsWindow: 15 * 60, // 15 minutes
+    type: "key-based",
+    getKey: getEmailFromRequest,
+  }),
+  emailVerification
+);
+
+// Login with rate limit
+router.route("/login").post(
+  rateLimiter({
+    allowedHits: 5,
+    secondsWindow: 15 * 60, // 15 minutes
+    type: "ip-based",
+  }),
+  login
+);
+
+// Logout with rate limit
+router.route("/logout").get(
+  rateLimiter({
+    allowedHits: 5,
+    secondsWindow: 15 * 60, // 15 minutes
+    type: "ip-based",
+  }),
+  logout
+);
+
+// Forget password with rate limit
+router.route("/forgetPassword").post(
+  rateLimiter({
+    allowedHits: 5,
+    secondsWindow: 24 * 60 * 60, // 24 hours
+    type: "key-based",
+    getKey: getEmailFromRequest,
+  }),
+  forgetPassword
+);
+
+// Reset password with rate limit
+router.route("/reset-password/:token").post(
+  rateLimiter({
+    allowedHits: 3,
+    secondsWindow: 60 * 60, // 1 hour
+    type: "ip-based",
+  }),
+  resetPassword
+);
+
+// Get all users with rate limit
+router.route("/all").get(
+  authenticateUser,
+  rateLimiter({
+    allowedHits: 10,
+    secondsWindow: 60, // 1 minute
+    type: "ip-based",
+  }),
+  getAllUsers
+);
 
 export default router;
